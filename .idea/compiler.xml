@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="simple-ecommrese (2)" />
+        <module name="stockAPP" />
+        <module name="simple-ecommrese (1)" />
+        <module name="1-1-mapping (3)" />
+        <module name="1-1-mapping (2)" />
+        <module name="1-1-mapping (1)" />
+        <module name="todo-app" />
+        <module name="hotel-managment" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="1-1-mapping" target="20" />
+      <module name="simple-ecommrese" target="20" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="1-1-mapping" options="-parameters" />
+      <module name="1-1-mapping (1)" options="-parameters" />
+      <module name="1-1-mapping (2)" options="-parameters" />
+      <module name="1-1-mapping (3)" options="-parameters" />
+      <module name="hotel-managment" options="-parameters" />
+      <module name="simple-ecommrese" options="-parameters" />
+      <module name="simple-ecommrese (1)" options="-parameters" />
+      <module name="simple-ecommrese (2)" options="-parameters" />
+      <module name="stockAPP" options="-parameters" />
+      <module name="todo-app" options="-parameters" />
+    </option>
+  </component>
+</project>
