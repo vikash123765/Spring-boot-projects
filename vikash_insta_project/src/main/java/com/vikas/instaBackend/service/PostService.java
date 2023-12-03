@@ -29,6 +29,8 @@ public class PostService {
         return  postRepo.findById(postId).orElseThrow();
     }
 
+
+
     public void removeById(Integer postId) {
 
         Post myPost = postRepo.findById(postId).orElseThrow();

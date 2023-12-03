@@ -2,22 +2,24 @@ package com.vikas.instaBackend.service;
 
 
 import com.vikas.instaBackend.model.*;
+import com.vikas.instaBackend.repo.ICommentRepo;
 import com.vikas.instaBackend.repo.IUserRepo;
 import com.vikas.instaBackend.service.EmailUtility.MailHandlerBase;
 import com.vikas.instaBackend.service.HashingUtility.PasswordEncryptor;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
 
     @Autowired
     IUserRepo userRepo;
-
+    @Autowired
+    ICommentRepo commentRepo;
     @Autowired
     AuthenticationService authenticationService;
 
@@ -163,7 +165,7 @@ public class UserService {
 
     }
 
-    public String getLikesByPostId(String email, String tokenValue, Integer postId) {
+    public String getLikesByPostId( Integer postId) {
 
         return postService.getLikesForPost(postId);
 
@@ -235,8 +237,9 @@ public class UserService {
         }
     }
 
-    public List<Comment> getCommentsByPostId(Integer postId) {
-        return commentService.findById(postId);
+    public String getCommentsByPostId(Integer postId) {
+
+        return commentService.getCommentsById(postId);
     }
 
     public String addCommentLike(String email, String tokenValue, Integer commentId, Integer postId) {
@@ -331,5 +334,44 @@ public class UserService {
             return follower.getUserBio() +" is not following " + userToFollow.getUserName();
         }
 
+    }
+
+    public String getCommentsByPostIdCount(Integer postId) {
+
+        return commentService.getCommentsById(postId);
+
+
+    }
+
+    public String getLikesByCommentId(Integer commentId) {
+        return likeService.getLikesByCommentId(commentId);
+    }
+
+    public List<Map<String, Object>> getActualCommentsByPostId(Integer postId) {
+        // get all the comments based on postId
+        List<Comment> comments = commentRepo.findByInstaPostPostId(postId);
+
+        // create a list where to store the result in
+        List<Map<String, Object>> commentList = new ArrayList<>();
+
+        // iterate once each comment in comments
+        for (Comment comment : comments) {
+            // create hashmap which will be a single comment
+            Map<String, Object> commentMap = new HashMap<>();
+
+            //populate map with username and commentbody fields via put  where key will be string representing the actual value
+            // via comment object vi can acess the required fields
+            commentMap.put("username", comment.getCommenter().getUserName());
+            commentMap.put("commentBody", comment.getCommentBody());
+            // add the hashmap to the result list
+            commentList.add(commentMap);
+        }
+        // return result list
+        return commentList;
+    }
+
+
+    public List<String> getActualLikesByPostId(Integer postId) {
+        return likeService.getActualLikesByPostId(postId);
     }
 }

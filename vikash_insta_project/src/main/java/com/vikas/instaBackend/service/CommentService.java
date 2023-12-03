@@ -41,11 +41,13 @@ public class CommentService {
 
     }
 
-    public List<Comment> findById(Integer postId) {
-       List<Comment> commentList= (List<Comment>) commentRepo.findById(postId).orElseThrow();
 
-        return commentList;
+    public String getCommentsById(Integer postId) {
+        return String.valueOf(commentRepo.countByInstaPostPostId(postId));
     }
 
 
+    public List<Comment> getActualCommentsByPostId(Integer instPost) {
+        return commentRepo.findByInstaPostPostId(instPost);
+    }
 }

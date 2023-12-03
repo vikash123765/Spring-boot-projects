@@ -9,6 +9,7 @@ import com.vikas.instaBackend.repo.ILikeRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -75,4 +76,28 @@ public class LikeService {
         }
 
     }
+
+    public String getLikesByCommentId(Integer commentId) {
+        return String.valueOf(likeRepo.countByInstaCommentCommentId(commentId));
+    }
+
+
+    public List<String> getActualLikesByPostId(Integer postId) {
+
+        // getting likes from likerepo based on post id
+            List<Like> likes = likeRepo.findByInstaPostPostId(postId);
+            // creating list to store the users
+            List<String> userLikers = new ArrayList<>();
+
+            // iterate once over all the likes
+            for (Like like : likes) {
+                // getting user from each like and adding to list
+                if (like.getInstaComment() == null) {
+                    userLikers.add(like.getLiker().getUserName());
+                }
+            }
+            // returning result
+            return userLikers;
+        }
+
 }

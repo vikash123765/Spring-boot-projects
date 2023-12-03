@@ -19,4 +19,12 @@ public interface ILikeRepo extends JpaRepository<Like,Integer> {
 
 
     Like findByLikeIdAndLiker(Integer likeId, User commentUnLiker);
+
+
+
+
+    long countByInstaCommentCommentId(Integer commentId);
+
+
+    List<Like> findByInstaPostPostId(Integer postId);
 }
