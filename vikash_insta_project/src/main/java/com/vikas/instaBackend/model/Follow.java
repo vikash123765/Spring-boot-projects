@@ -16,12 +16,12 @@ public class Follow {
     private Integer followId;
 
 
-    @ManyToOne
-    @JoinColumn(name = "fk_actual_user")
-    User currentUser;
+
 
     @ManyToOne
-    @JoinColumn(name = "fk_follower_of_actual_user")
+    @JoinColumn(name ="user" )
     User currentUserFollower;
-
+    @ManyToOne
+    @JoinColumn(name = "target")
+    User currentUser;
 }

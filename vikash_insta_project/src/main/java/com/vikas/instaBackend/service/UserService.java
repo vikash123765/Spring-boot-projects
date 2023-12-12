@@ -6,7 +6,6 @@ import com.vikas.instaBackend.repo.ICommentRepo;
 import com.vikas.instaBackend.repo.IUserRepo;
 import com.vikas.instaBackend.service.EmailUtility.MailHandlerBase;
 import com.vikas.instaBackend.service.HashingUtility.PasswordEncryptor;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +34,8 @@ public class UserService {
     @Autowired
     FollowService followService;
 
+    @Autowired
+    CommentLikeService commentLikeService;
 
     public String userSignUp(User newUser) {
 
@@ -58,8 +59,8 @@ public class UserService {
             String encryptedPassword = PasswordEncryptor.encrypt(signUpPassword);
 
             newUser.setUserPassword(encryptedPassword);
+            // set default to false bluetick we should not be able to set it to true
             newUser.setBlueTick(false);
-
 
             userRepo.save(newUser);
             return "Insta user registered!!!";
@@ -182,7 +183,7 @@ public class UserService {
             boolean alreadyLiked = likeService.isAlreadyLiked(instaPost, liker);
 
             if (!alreadyLiked) {
-                Like newLike = new Like(null, instaPost, null, liker);
+                Like newLike = new Like(null, instaPost, liker);
                 likeService.addLike(newLike);
                 return liker.getUserHandle() + " like post: " + postId;
             } else {
@@ -226,15 +227,30 @@ public class UserService {
 
     public String removeComment(String email, String tokenValue, Integer commentId) {
         if (authenticationService.authenticate(email, tokenValue)) {
+
             // figure out the comment by comment id
             Comment commentToBeDeleted = commentService.getCommentById(commentId);
 
-            commentService.removeCommentById(commentToBeDeleted);
-            return commentToBeDeleted.getCommentBody() + "was deleted";
+            // figure out the insta post of that comment to get acccess to actualpost owner
+            Post instaPostOfComment = commentToBeDeleted.getInstaPost();
+
+            if(authorizeCommentRemover(email,instaPostOfComment,commentToBeDeleted)) {
+                commentService.removeCommentById(commentToBeDeleted);
+                return commentToBeDeleted.getCommentBody() + "was deleted";
+            }
+            else{
+                return  "not Authoruized";
+            }
 
         } else {
             return "Un Authenticated access!!";
         }
+    }
+
+    private boolean authorizeCommentRemover(String email, Post instaPostOfComment, Comment commentToBeDeleted) {
+        User potentialRemover = userRepo.findByUserEmail(email);
+        /// only the commenter and the owner of the post should be able to deleet comments
+        return potentialRemover.equals(instaPostOfComment.getPostOwner()) || potentialRemover.equals(commentToBeDeleted.getCommenter());
     }
 
     public String getCommentsByPostId(Integer postId) {
@@ -251,11 +267,11 @@ public class UserService {
 
 
             // first check whether this liker has already liked this insta commemt
-            boolean alreadyLiked = likeService.commentIsAlreadyLiked(commentToBeLiked, commentLiker);
+            boolean alreadyLiked = commentLikeService.commentIsAlreadyLiked(commentToBeLiked, commentLiker);
 
             if (!alreadyLiked) {
-                Like newLike = new Like(null, instaPost, commentToBeLiked, commentLiker);
-                likeService.addLike(newLike);
+                CommentLike newCommentLike = new CommentLike(commentId,instaPost,commentToBeLiked,commentLiker);
+                commentLikeService.addCommentLike(newCommentLike);
                 return commentLiker.getUserHandle() + " liked comment: " + commentId;
             } else {
                 return "already liked";
@@ -268,27 +284,28 @@ public class UserService {
     public String removeCommentLike(String email, String tokenValue, Integer likeId) {
         if (authenticationService.authenticate(email, tokenValue)) {
             User commentUnLiker = userRepo.findByUserEmail(email);
-            return likeService.removeLikeByLikerAndComment(likeId, commentUnLiker);
+            return commentLikeService.removeLikeByLikerAndComment(likeId, commentUnLiker);
 
         } else {
             return "Un Authenticated access!!";
         }
     }
 
-    public String follow(String email, String tokenValue, Integer userId, Integer followerId) {
+    public String follow(String email, String tokenValue, Integer targetId) {
 
         if (authenticationService.authenticate(email, tokenValue)) {
+
+            //follower
+            User follower = userRepo.findByUserEmail(email);
             // figure the user that wants to follow
-            User follower = userRepo.findById(userId).orElseThrow();
-            //  figure out the user to be followed
-            User userToFollow = userRepo.findById(followerId).orElseThrow();
+            User userToFollow = userRepo.findById(targetId).orElseThrow();
 
             // first check whether this follower  is already following userToFollow
-            boolean alreadyFollowing = followService.isAlreadyFollowing(follower, userToFollow);
+            boolean alreadyFollowing = followService.isAlreadyFollowing(follower,userToFollow);
 
             if (!alreadyFollowing) {
-                Follow newFollow = new Follow(null, follower, userToFollow);
-                followService.follow(newFollow);
+
+                followService.startFollowing(follower,userToFollow);
                 return follower.getUserHandle() + " is now succesfully following: " + userToFollow.getUserHandle();
             } else {
                 return "already following";
@@ -299,10 +316,10 @@ public class UserService {
     }
 
 
-    public String removeFollow(String email, String tokenValue, Integer userId, Integer followerId) {
+    public String removeFollow(String email, String tokenValue, Integer followerId) {
         if (authenticationService.authenticate(email, tokenValue)) {
             // figure the user that wants to follow
-            User follower = userRepo.findById(userId).orElseThrow();
+            User follower = userRepo.findByUserEmail(email);
             // figure out the user to be followed
             User userToFollow = userRepo.findById(followerId).orElseThrow();
 
@@ -344,7 +361,7 @@ public class UserService {
     }
 
     public String getLikesByCommentId(Integer commentId) {
-        return likeService.getLikesByCommentId(commentId);
+        return commentLikeService.getLikesByCommentId(commentId);
     }
 
     public List<Map<String, Object>> getActualCommentsByPostId(Integer postId) {
@@ -373,5 +390,13 @@ public class UserService {
 
     public List<String> getActualLikesByPostId(Integer postId) {
         return likeService.getActualLikesByPostId(postId);
+    }
+
+    public String getFollowsAndFollowingByUserId(Integer userId) {
+        return followService.getFollowsAndFollowingByUserId(userId);
+    }
+
+    public List<String> getActualLikesByCommentId(Integer commentId) {
+        return commentLikeService.getActualLikesByCommentId(commentId);
     }
 }

@@ -1,7 +1,9 @@
 package com.vikas.instaBackend.repo;
 
 import com.vikas.instaBackend.model.Comment;
+import com.vikas.instaBackend.model.Like;
 import com.vikas.instaBackend.model.Post;
+import com.vikas.instaBackend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
@@ -18,4 +20,6 @@ public interface ICommentRepo extends JpaRepository<Comment,Integer> {
     Integer countByInstaPostPostId(Integer postId);
 
     List<Comment> findByInstaPostPostId(Integer postId);
+
+
 }

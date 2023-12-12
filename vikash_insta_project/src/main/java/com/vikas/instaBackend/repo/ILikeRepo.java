@@ -15,15 +15,6 @@ public interface ILikeRepo extends JpaRepository<Like,Integer> {
 
     List<Like> findByInstaPostAndLiker(Post instaPost, User liker);
 
-    Like findByInstaCommentAndLiker(Comment instaComment, User liker);
-
-
-    Like findByLikeIdAndLiker(Integer likeId, User commentUnLiker);
-
-
-
-
-    long countByInstaCommentCommentId(Integer commentId);
 
 
     List<Like> findByInstaPostPostId(Integer postId);

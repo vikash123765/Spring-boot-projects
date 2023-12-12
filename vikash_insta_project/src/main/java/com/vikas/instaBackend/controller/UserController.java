@@ -90,6 +90,13 @@ public class UserController {
         return userService.getLikesByCommentId(commentId);
     }
 
+    // get count of how many followers  a user has and  how many  user is following
+    @GetMapping("count/followersAndFollowing/{userId}")
+    public String getFollowsAndFollowingByUserId(@PathVariable Integer userId)
+    {
+        return userService.getFollowsAndFollowingByUserId(userId);
+    }
+
 
 
     //get how many  comments for a particular post:
@@ -113,12 +120,18 @@ public class UserController {
         return userService.getActualLikesByPostId(postId);
     }
 
+    // get actual likers of a comment
+    @GetMapping("likes/comment/{commentId}")
+    public List<String> getActualLikesByCommentId(@PathVariable Integer commentId) {
+        return userService.getActualLikesByCommentId(commentId);
+    }
+
     // like a comment
     @PostMapping("like/comment/{commentId}")
     public String addCommentLike(@RequestParam String email, @RequestParam String tokenValue, @PathVariable Integer commentId,Integer postId){
         return userService.addCommentLike(email,tokenValue,commentId,postId);
     }
-    // unlike a perticual comment
+    // unlike a a comment
 
   @DeleteMapping("unlike/comment/{likeId}")
 
@@ -127,8 +140,8 @@ public class UserController {
   }
 
 
-    // delete perticular comment
-    @DeleteMapping("post/comment/{commentIds}")
+    // delete a comment
+    @DeleteMapping("post/comment/{commentId}")
     public String removeComment(@RequestParam String email, @RequestParam String tokenValue, @PathVariable Integer commentId)
     {
         return userService.removeComment(email,tokenValue,commentId);
@@ -145,17 +158,17 @@ public class UserController {
 
 
     // follow
-    @PostMapping("user/{userId}/follower/{followerId}")
-    public String follow(@RequestParam String email, @RequestParam String tokenValue,@PathVariable Integer userId,@PathVariable Integer  followerId){
-        return userService.follow(email,tokenValue,userId,followerId);
+    @PostMapping("follow/user/{targetId}")
+    public String follow(@RequestParam String email, @RequestParam String tokenValue,@PathVariable Integer  targetId){
+        return userService.follow(email,tokenValue,targetId);
     }
 
 
     // unfollow
-    @DeleteMapping("unFollow/{userId}/followerId{followerId}")
+    @DeleteMapping("unFollow/followerId{followerId}")
 
-    public String unFollowUser(@RequestParam String email, @RequestParam String tokenValue, @PathVariable Integer userId,@PathVariable Integer followerId){
-        return userService.removeFollow(email,tokenValue,userId,followerId);
+    public String unFollowUser(@RequestParam String email, @RequestParam String tokenValue,@PathVariable Integer followerId){
+        return userService.removeFollow(email,tokenValue,followerId);
     }
 
     // is following or not

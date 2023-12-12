@@ -46,12 +46,7 @@ public class LikeService {
 
 
     }
-    public boolean commentIsAlreadyLiked(Comment instaComment, User liker ){
-       Like like = likeRepo.findByInstaCommentAndLiker(instaComment,liker);
-       return like!= null;
 
-
-    }
 
     public void addLike(Like newLike) {
         likeRepo.save(newLike);
@@ -65,21 +60,9 @@ public class LikeService {
     }
 
 
-    public String removeLikeByLikerAndComment(Integer likeId, User commentUnLiker) {
-        Like like = likeRepo.findByLikeIdAndLiker(likeId, commentUnLiker);
 
-        if (like != null) {
-            likeRepo.delete(like);
-            return "Like removed successfully";
-        } else {
-            return " like not found with ID: " + likeId;
-        }
 
-    }
 
-    public String getLikesByCommentId(Integer commentId) {
-        return String.valueOf(likeRepo.countByInstaCommentCommentId(commentId));
-    }
 
 
     public List<String> getActualLikesByPostId(Integer postId) {
@@ -90,14 +73,16 @@ public class LikeService {
             List<String> userLikers = new ArrayList<>();
 
             // iterate once over all the likes
-            for (Like like : likes) {
-                // getting user from each like and adding to list
-                if (like.getInstaComment() == null) {
-                    userLikers.add(like.getLiker().getUserName());
-                }
+        for (Like like : likes) {
+            // Check for null values before accessing properties
+            if (like.getInstaPost() != null && like.getLiker() != null && like.getLiker().getUserName() != null) {
+                // Getting user from each like and adding to the list
+                userLikers.add(like.getLiker().getUserName());
             }
+        }
             // returning result
             return userLikers;
         }
+
 
 }
